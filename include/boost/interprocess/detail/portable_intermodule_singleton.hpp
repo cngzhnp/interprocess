@@ -22,6 +22,7 @@
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/workaround.hpp>
 
+#include <boost/core/no_exceptions_support.hpp>
 #include <boost/interprocess/detail/managed_global_memory.hpp>
 #include <boost/interprocess/detail/intermodule_singleton_common.hpp>
 #include <boost/interprocess/shared_memory_object.hpp>
@@ -152,7 +153,7 @@ struct thread_safe_global_map_dependant<managed_global_memory>
    static void apply_gmem_erase_logic(const char *filepath, const char *filename)
    {
       int fd = GMemMarkToBeRemoved;
-      try{
+      BOOST_TRY{
          std::string str;
          //If the filename is current process lock file, then avoid it
          if(check_if_filename_complies_with_pid
@@ -167,21 +168,23 @@ struct thread_safe_global_map_dependant<managed_global_memory>
          //If done, then the process is dead so take global shared memory name
          //(the name is based on the lock file name) and try to apply erasure logic
          str.insert(0, get_map_base_name());
-         try{
+         BOOST_TRY{
             managed_global_memory shm(open_only, str.c_str());
             gmem_erase_func func(str.c_str(), filepath, shm);
             shm.try_atomic_func(func);
          }
-         catch(interprocess_exception &e){
+         BOOST_CATCH(interprocess_exception &e){
             //If shared memory is not found erase the lock file
             if(e.get_error_code() == not_found_error){
                delete_file(filepath);
             }
          }
+         BOOST_CATCH_END
       }
-      catch(...){
+      BOOST_CATCH(...){
 
       }
+      BOOST_CATCH_END
       if(fd >= 0){
          close_lock_file(fd);
       }

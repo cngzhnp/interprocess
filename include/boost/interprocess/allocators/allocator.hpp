@@ -30,14 +30,22 @@
 #include <boost/interprocess/allocators/detail/allocator_common.hpp>
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/interprocess/containers/version_type.hpp>
-#include <boost/interprocess/exceptions.hpp>
+
 #include <boost/assert.hpp>
 #include <boost/utility/addressof.hpp>
 #include <boost/interprocess/detail/type_traits.hpp>
 #include <boost/container/detail/placement_new.hpp>
 
 #include <cstddef>
-#include <stdexcept>
+
+#if !(defined BOOST_NO_EXCEPTIONS)
+#  include <boost/interprocess/exceptions.hpp>
+#  include <stdexcept>
+#else
+#  include <boost/core/no_exceptions_support.hpp>
+#endif
+#endif
+
 
 //!\file
 //!Describes an allocator that allocates portions of fixed size

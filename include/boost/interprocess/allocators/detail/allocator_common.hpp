@@ -28,7 +28,6 @@
 #include <boost/interprocess/detail/utilities.hpp> //to_raw_pointer
 #include <boost/utility/addressof.hpp> //boost::addressof
 #include <boost/assert.hpp>   //BOOST_ASSERT
-#include <boost/interprocess/exceptions.hpp> //bad_alloc
 #include <boost/interprocess/sync/scoped_lock.hpp> //scoped_lock
 #include <boost/interprocess/containers/allocation_type.hpp> //boost::interprocess::allocation_type
 #include <boost/container/detail/multiallocation_chain.hpp>
@@ -39,6 +38,12 @@
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/container/detail/placement_new.hpp>
 #include <boost/move/adl_move_swap.hpp>
+
+#if !(defined BOOST_NO_EXCEPTIONS)
+#  include <boost/interprocess/exceptions.hpp> //bad_alloc
+#else
+#  include <boost/core/no_exceptions_support.hpp>
+#endif
 
 namespace boost {
 namespace interprocess {

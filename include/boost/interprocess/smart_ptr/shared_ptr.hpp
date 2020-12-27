@@ -27,6 +27,7 @@
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/workaround.hpp>
 
+#include <boost/core/no_exceptions_support.hpp>
 #include <boost/interprocess/detail/utilities.hpp>
 #include <boost/interprocess/detail/cast_tags.hpp>
 #include <boost/assert.hpp>
@@ -395,16 +396,17 @@ template<class T, class ManagedMemory>
 inline typename managed_shared_ptr<T, ManagedMemory>::type
    make_managed_shared_ptr(T *constructed_object, ManagedMemory &managed_memory, const std::nothrow_t &)
 {
-   try{
+   BOOST_TRY{
       return typename managed_shared_ptr<T, ManagedMemory>::type
       ( constructed_object
       , managed_memory.template get_allocator<void>()
       , managed_memory.template get_deleter<T>()
       );
    }
-   catch(...){
+   BOOST_CATCH(...){
       return typename managed_shared_ptr<T, ManagedMemory>::type();
    }
+   BOOST_CATCH_END
 }
 
 

@@ -20,6 +20,7 @@
 #endif
 
 #include <boost/interprocess/detail/config_begin.hpp>
+#include <boost/core/no_exceptions_support.hpp>
 #include <boost/interprocess/detail/os_thread_functions.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <boost/interprocess/creation_tags.hpp>
@@ -364,41 +365,43 @@ class managed_open_or_create_impl
          bool completed = false;
          spin_wait swait;
          while(!completed){
-            try{
+            BOOST_TRY{
                create_device<FileBased>(dev, id, size, perm, file_like_t());
                created     = true;
                completed   = true;
             }
-            catch(interprocess_exception &ex){
+            BOOST_CATCH(interprocess_exception &ex){
                if(ex.get_error_code() != already_exists_error){
                   throw;
                }
                else{
-                  try{
+                  BOOST_TRY{
                      DeviceAbstraction tmp(open_only, id, read_write);
                      dev.swap(tmp);
                      created     = false;
                      completed   = true;
                   }
-                  catch(interprocess_exception &e){
+                  BOOST_CATCH(interprocess_exception &e){
                      if(e.get_error_code() != not_found_error){
                         throw;
                      }
                   }
-                  catch(...){
+                  BOOST_CATCH(...){
                      throw;
                   }
+                  BOOST_CATCH_END
                }
             }
-            catch(...){
+            BOOST_CATCH(...){
                throw;
             }
+            BOOST_CATCH_END
             swait.yield();
          }
       }
 
       if(created){
-         try{
+         BOOST_TRY{
             //If this throws, we are lost
             truncate_device<FileBased>(dev, size, file_like_t());
 
@@ -409,16 +412,17 @@ class managed_open_or_create_impl
             boost::uint32_t previous = atomic_cas32(patomic_word, InitializingSegment, UninitializedSegment);
 
             if(previous == UninitializedSegment){
-               try{
+               BOOST_TRY{
                   construct_func( static_cast<char*>(region.get_address()) + ManagedOpenOrCreateUserOffset
                                 , size - ManagedOpenOrCreateUserOffset, true);
                   //All ok, just move resources to the external mapped region
                   m_mapped_region.swap(region);
                }
-               catch(...){
+               BOOST_CATCH(...){
                   atomic_write32(patomic_word, CorruptedSegment);
                   throw;
                }
+               BOOST_CATCH_END
                atomic_write32(patomic_word, InitializedSegment);
             }
             else if(previous == InitializingSegment || previous == InitializedSegment){
@@ -428,14 +432,16 @@ class managed_open_or_create_impl
                throw interprocess_exception(error_info(corrupted_error));
             }
          }
-         catch(...){
-            try{
+         BOOST_CATCH(...){
+            BOOST_TRY{
                truncate_device<FileBased>(dev, 1u, file_like_t());
             }
-            catch(...){
+            BOOST_CATCH(...){
             }
             throw;
+            BOOST_CATCH_END
          }
+         BOOST_CATCH_END
       }
       else{
          if(FileBased){

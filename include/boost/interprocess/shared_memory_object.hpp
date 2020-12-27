@@ -22,10 +22,10 @@
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/workaround.hpp>
 #include <boost/interprocess/creation_tags.hpp>
+#include <boost/core/no_exceptions_support.hpp>
 #include <boost/interprocess/exceptions.hpp>
 #include <boost/move/utility_core.hpp>
 #include <boost/interprocess/interprocess_fwd.hpp>
-#include <boost/interprocess/exceptions.hpp>
 #include <boost/interprocess/detail/os_file_functions.hpp>
 #include <boost/interprocess/detail/shared_dir_helpers.hpp>
 #include <boost/interprocess/permissions.hpp>
@@ -224,15 +224,16 @@ inline bool shared_memory_object::priv_open_or_create
 
 inline bool shared_memory_object::remove(const char *filename)
 {
-   try{
+   BOOST_TRY{
       //Make sure a temporary path is created for shared memory
       std::string shmfile;
       ipcdetail::shared_filepath(filename, shmfile);
       return ipcdetail::delete_file(shmfile.c_str());
    }
-   catch(...){
+   BOOST_CATCH(...){
       return false;
    }
+   BOOST_CATCH_END
 }
 
 inline void shared_memory_object::truncate(offset_t length)
@@ -370,7 +371,7 @@ inline bool shared_memory_object::priv_open_or_create
 
 inline bool shared_memory_object::remove(const char *filename)
 {
-   try{
+   BOOST_TRY{
       std::string filepath;
       #if defined(BOOST_INTERPROCESS_FILESYSTEM_BASED_POSIX_SHARED_MEMORY)
       const bool add_leading_slash = false;
@@ -387,9 +388,10 @@ inline bool shared_memory_object::remove(const char *filename)
       }
       return 0 == shm_unlink(filepath.c_str());
    }
-   catch(...){
+   BOOST_CATCH(...){
       return false;
    }
+   BOOST_CATCH_END
 }
 
 inline void shared_memory_object::truncate(offset_t length)

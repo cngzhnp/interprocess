@@ -21,6 +21,7 @@
 
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/workaround.hpp>
+#include <boost/core/no_exceptions_support.hpp>
 #include <boost/interprocess/creation_tags.hpp>
 #include <boost/interprocess/permissions.hpp>
 #include <boost/interprocess/detail/shared_dir_helpers.hpp>
@@ -199,15 +200,16 @@ inline void windows_named_sync::open_or_create
 
 inline bool windows_named_sync::remove(const char *name)
 {
-   try{
+   BOOST_TRY{
       //Make sure a temporary path is created for shared memory
       std::string semfile;
       ipcdetail::shared_filepath(name, semfile);
       return winapi::unlink_file(semfile.c_str());
    }
-   catch(...){
+   BOOST_CATCH(...){
       return false;
    }
+   BOOST_CATCH_END
 }
 
 }  //namespace ipcdetail {

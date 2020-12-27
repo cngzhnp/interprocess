@@ -35,6 +35,11 @@
 #include <boost/interprocess/windows_shared_memory.hpp>
 #endif
 
+#if !(defined BOOST_NO_EXCEPTIONS)
+#  include <boost/interprocess/exceptions.hpp> //bad_alloc
+#else
+#  include <boost/core/no_exceptions_support.hpp>
+#endif
 
 //!\file
 //!Describes a function that creates anonymous shared memory that can be

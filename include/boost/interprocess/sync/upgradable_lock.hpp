@@ -26,6 +26,7 @@
 
 #include <boost/interprocess/detail/config_begin.hpp>
 #include <boost/interprocess/detail/workaround.hpp>
+#include <boost/core/no_exceptions_support.hpp>
 #include <boost/interprocess/interprocess_fwd.hpp>
 #include <boost/interprocess/sync/lock_options.hpp>
 #include <boost/interprocess/detail/mpl.hpp>
@@ -184,10 +185,13 @@ class upgradable_lock
    //!Notes: The destructor behavior ensures that the mutex lock is not leaked.
    ~upgradable_lock()
    {
-      try{
+      BOOST_TRY{
          if(m_locked && mp_mutex)   mp_mutex->unlock_upgradable();
       }
-      catch(...){}
+      BOOST_CATCH(...){
+
+      }
+      BOOST_CATCH_END
    }
 
    //!Effects: If owns(), then unlock_upgradable() is called on mutex().
